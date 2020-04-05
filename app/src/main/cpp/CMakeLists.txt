@@ -17,7 +17,10 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp)
+        native-lib.cpp
+        jni-bridge.cpp
+        OboeSinePlayer.cpp
+        )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -32,13 +35,28 @@ find_library( # Sets the name of the path variable.
         # you want CMake to locate.
         log)
 
+# Build the Oboe library
+set (OBOE_DIR ./oboe)
+add_subdirectory (${OBOE_DIR} ./oboe)
+
+# Make the Oboe public headers available to our app
+include_directories (${OBOE_DIR}/include)
+
+
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
         native-lib
+        oboe
 
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
+
+# Enable optimization flags: if having problems with source level debugging,
+# disable -Ofast ( and debug ), re-enable after done debugging.
+#target_compile_options(native-lib PRIVATE -Ofast)
+target_compile_options(native-lib PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
+
