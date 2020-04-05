@@ -19,7 +19,8 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         native-lib.cpp
         jni-bridge.cpp
-        OboeSinePlayer.cpp
+        LupeSynth.cpp
+        LupeSoundEngine.cpp
         )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -50,13 +51,12 @@ include_directories (${OBOE_DIR}/include)
 target_link_libraries( # Specifies the target library.
         native-lib
         oboe
-
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
 
 # Enable optimization flags: if having problems with source level debugging,
 # disable -Ofast ( and debug ), re-enable after done debugging.
-#target_compile_options(native-lib PRIVATE -Ofast)
-target_compile_options(native-lib PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
+target_compile_options(native-lib PRIVATE -Ofast)
+#target_compile_options(native-lib PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
 

@@ -3,8 +3,11 @@ package com.djonus.lupe
 import android.content.Context
 import android.media.AudioManager
 import android.os.Bundle
+import android.util.Log
+import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -13,31 +16,44 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Example of a call to a native method
-        sample_text.text = stringFromJNI()
+        tv_result.text = stringFromJNI()
 
-        val myAudioMgr =
-            getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val sampleRateStr =
-            myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)
-        val defaultSampleRate = sampleRateStr.toInt()
-        val framesPerBurstStr =
-            myAudioMgr.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
-        val defaultFramesPerBurst = framesPerBurstStr.toInt()
-        setDefaultStreamValues(defaultSampleRate, defaultFramesPerBurst)
+        adjustDefaultStreamValue()
 
-        startSine()
+        val engineRef = createEngine()
+
+        synth_pad.setOnTouchListener { view, event ->
+
+            val x = event.x.roundToInt()
+            val y = event.y.roundToInt()
+
+            Log.d("LupeAct", "event: ${event.action}")
+
+            when (event.action) {
+                MotionEvent.ACTION_UP -> stopSynth(engineRef)
+                else -> playSynth(engineRef, x, y)
+            }
+            true
+        }
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
     external fun stringFromJNI(): String
-
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
+    external fun createEngine(): Long
+    external fun playSynth(engineRef: Long, x: Int, y: Int)
+    external fun stopSynth(engineRef: Long)
 
-    external fun startSine()
+    private fun adjustDefaultStreamValue() {
+        val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        val sampleRateStr = myAudioMgr
+            .getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE)
+
+        val framesPerBurstStr = myAudioMgr
+            .getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER)
+
+        setDefaultStreamValues(sampleRateStr.toInt(), framesPerBurstStr.toInt())
+    }
 
     companion object {
 
