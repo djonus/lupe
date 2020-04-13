@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
             val x = view.normalizeFrequency(event.x)
             val y = view.normalizeAmplitude(event.y)
 
+            tv_result.text = "x:${event.x}\ny:${event.y}\n\nfrequency:$x\namplitude:$y"
+
             Log.d("LupeAct", "touch event: $event")
 
             val isTouchingPad = event.x >= 0 && event.x <= view.width
