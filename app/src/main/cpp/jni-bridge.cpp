@@ -38,11 +38,12 @@ Java_com_djonus_lupe_MainActivity_playSynth(
         JNIEnv *env,
         jclass type,
         jlong engineHandle,
-        jint x,
-        jint y) {
+        jdouble x,
+        jdouble y) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->playSynth(x, y);
+    engine->mLupeSynth.control(x, y);
+    engine->start();
 }
 
 JNIEXPORT void JNICALL
@@ -52,7 +53,7 @@ Java_com_djonus_lupe_MainActivity_stopSynth(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->stopSynth();
+    engine->stop();
 }
 
 }

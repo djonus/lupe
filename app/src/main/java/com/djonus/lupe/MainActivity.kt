@@ -5,9 +5,11 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.djonus.lupe.utils.exponential
+import com.djonus.lupe.utils.normalize
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,14 +26,20 @@ class MainActivity : AppCompatActivity() {
 
         synth_pad.setOnTouchListener { view, event ->
 
-            val x = event.x.roundToInt()
-            val y = event.y.roundToInt()
+            val x = view.normalizeFrequency(event.x)
+            val y = view.normalizeAmplitude(event.y)
 
-            Log.d("LupeAct", "event: ${event.action}")
+            Log.d("LupeAct", "touch event: $event")
+
+            val isTouchingPad = event.x >= 0 && event.x <= view.width
+                    && event.y >= 0 && event.y <= view.height
 
             when (event.action) {
                 MotionEvent.ACTION_UP -> stopSynth(engineRef)
-                else -> playSynth(engineRef, x, y)
+                else -> when {
+                    !isTouchingPad -> stopSynth(engineRef)
+                    else -> playSynth(engineRef, x, y)
+                }
             }
             true
         }
@@ -40,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     external fun stringFromJNI(): String
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     external fun createEngine(): Long
-    external fun playSynth(engineRef: Long, x: Int, y: Int)
+    external fun playSynth(engineRef: Long, x: Double, y: Double)
     external fun stopSynth(engineRef: Long)
 
     private fun adjustDefaultStreamValue() {
@@ -54,6 +62,21 @@ class MainActivity : AppCompatActivity() {
 
         setDefaultStreamValues(sampleRateStr.toInt(), framesPerBurstStr.toInt())
     }
+
+    private val frequencyRange: ClosedRange<Double> = 20.0..20000.0
+    private val frequencyExponentialFactor = 2.0
+    private val amplitudeRange: ClosedRange<Double> = 0.0..2.0
+    private val amplitudeExponentialFactor = 2.0
+
+    private fun View.normalizeFrequency(x: Float): Double =
+        (0.0..width.toDouble())
+            .normalize(frequencyRange, x)
+            .exponential(frequencyExponentialFactor, frequencyRange)
+
+    private fun View.normalizeAmplitude(y: Float): Double =
+        (0.0..height.toDouble())
+            .normalize(amplitudeRange, y)
+            .exponential(amplitudeExponentialFactor, amplitudeRange)
 
     companion object {
 

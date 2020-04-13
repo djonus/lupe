@@ -10,13 +10,15 @@ public:
 
     LupeSoundEngine();
 
-    void playSynth(int x, int y);
-    void stopSynth();
+    void start();
+    void stop();
+
+    LupeSynth mLupeSynth;
 
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;
 
 private:
-    LupeSynth mLupeSynth;
+
     oboe::ManagedStream mOutStream;
     bool mPlaySynth = false;
     // Stream params

@@ -25,21 +25,21 @@ LupeSoundEngine::LupeSoundEngine() : mLupeSynth(oboe::DefaultStreamValues::Sampl
     mOutStream->setBufferSizeInFrames(streamFramesPerBurst * 2);
 }
 
-void LupeSoundEngine::playSynth(int x, int y) {
+void LupeSoundEngine::start() {
     oboe::StreamState state = mOutStream->getState();
 
-    LOGD("Play synth: [state:%d] [x:%d]", state, x);
-    mLupeSynth.control(x, y);
-
+    LOGD("Engine state: %d]", state);
     if (state < oboe::StreamState::Starting || state > oboe::StreamState::Pausing) {
+        LOGD("Engine start");
         mOutStream->start();
     }
     mPlaySynth = true;
 }
 
-void LupeSoundEngine::stopSynth() {
-    LOGD("Stop synth: [state%d]", mOutStream->getState());
+void LupeSoundEngine::stop() {
+    LOGD("Engine state: %d]", mOutStream->getState());
     if (mOutStream->getState() < oboe::StreamState::Pausing) {
+        LOGD("Engine pause");
         mOutStream->pause();
     }
     mPlaySynth = false;

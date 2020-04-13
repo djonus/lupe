@@ -6,20 +6,23 @@
 #include <cmath>
 #include "utils/logging.h"
 
-LupeSynth::LupeSynth(double sampleRate) {
-    LOGD("Hello from LupeSynth: [sampleRate:%d]", sampleRate);
+LupeSynth::LupeSynth(int sampleRate) {
+    LOGD("LupeSynth created: [sampleRate:%d]", sampleRate);
     mSampleRate = sampleRate;
 }
 
-void LupeSynth::control(int x, int y) {
+void LupeSynth::control(double x, double y) {
+    LOGD("LupeSynth controlled: [state:%d] [x:%f] [y:%f]", x, y);
+
     mX = x;
     mY = y;
 
+    mAmplitude = (float) mY;
     mPhaseIncrement = mX * kTwoPi / (double) mSampleRate;
 }
 
 float LupeSynth::sample() {
-    float result = kAmplitude * sinf(mPhase);
+    float result = mAmplitude * sinf(mPhase);
     mPhase += mPhaseIncrement;
     if (mPhase >= kTwoPi) mPhase -= kTwoPi;
     return result;
