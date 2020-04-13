@@ -6,16 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tv_result"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="text result"
-        android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/synth_pad"
         android:layout_width="0dp"
@@ -25,9 +15,44 @@
         android:padding="24dp"
         android:text="R2D2 X Y synth pad"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_result" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_synth_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:hint="text result"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="@id/synth_pad"
+        app:layout_constraintStart_toStartOf="@id/synth_pad"
+        app:layout_constraintTop_toTopOf="@id/synth_pad" />
+
+    <Button
+        android:id="@+id/b_record"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="record"
+        app:layout_constraintEnd_toStartOf="@+id/b_play"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/synth_pad" />
+
+    <Button
+        android:id="@+id/b_play"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="play"
+        app:layout_constraintBottom_toBottomOf="@id/b_record"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/b_record"
+        app:layout_constraintTop_toTopOf="@id/b_record" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

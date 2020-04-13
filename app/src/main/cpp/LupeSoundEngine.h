@@ -13,6 +13,11 @@ public:
     void start();
     void stop();
 
+    void record();
+    void stopRecord();
+    void startPlayback();
+    void stopPlayback();
+
     LupeSynth mLupeSynth;
 
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;

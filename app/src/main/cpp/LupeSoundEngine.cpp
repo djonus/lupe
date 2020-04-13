@@ -55,6 +55,22 @@ void LupeSoundEngine::stop() {
     mPlaySynth = false;
 }
 
+void LupeSoundEngine::startPlayback(){
+    LOGD("Engine start playback");
+}
+
+void LupeSoundEngine::stopPlayback(){
+    LOGD("Engine stop playback");
+}
+
+void LupeSoundEngine::record(){
+    LOGD("Engine record");
+}
+
+void LupeSoundEngine::stopRecord(){
+    LOGD("Engine stop record");
+}
+
 oboe::DataCallbackResult
 LupeSoundEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
     auto *floatData = (float *) audioData;

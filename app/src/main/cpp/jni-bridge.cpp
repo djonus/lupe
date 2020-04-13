@@ -56,5 +56,44 @@ Java_com_djonus_lupe_MainActivity_stopSynth(
     engine->stop();
 }
 
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_startPlayback(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->startPlayback();
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_stopPlayback(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->stopPlayback();
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_record(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->record();
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_stopRecord(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->stopRecord();
+}
 }
 

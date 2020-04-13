@@ -18,8 +18,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        tv_result.text = stringFromJNI()
-
         adjustDefaultStreamValue()
 
         val engineRef = createEngine()
@@ -29,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             val x = view.normalizeFrequency(event.x)
             val y = view.normalizeAmplitude(view.height - event.y)
 
-            tv_result.text = "x:${event.x}\ny:${event.y}\n\nfrequency:$x\namplitude:$y"
+            tv_synth_input.text = "x:${event.x}\ny:${event.y}\n\nfrequency:$x\namplitude:$y"
 
             Log.d("LupeAct", "touch event: $event")
 
@@ -43,15 +41,51 @@ class MainActivity : AppCompatActivity() {
                     else -> playSynth(engineRef, x, y)
                 }
             }
-            true
+            false
+        }
+
+        val stopText = "stop"
+        val playText = "play"
+        b_play.text = playText
+        b_play.setOnClickListener {
+            b_play.text = when (b_play.text) {
+                playText -> {
+                    startPlayback(engineRef)
+                    stopText
+                }
+                else -> {
+                    stopPlayback(engineRef)
+                    playText
+                }
+            }
+        }
+
+        val stopRecordText = "cut"
+        val recordText = "record"
+        b_record.text = recordText
+        b_record.setOnClickListener {
+            b_record.text = when (b_record.text) {
+                recordText -> {
+                    record(engineRef)
+                    stopRecordText
+                }
+                else -> {
+                    stopRecord(engineRef)
+                    recordText
+                }
+            }
         }
     }
 
-    external fun stringFromJNI(): String
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     external fun createEngine(): Long
     external fun playSynth(engineRef: Long, x: Double, y: Double)
     external fun stopSynth(engineRef: Long)
+
+    external fun startPlayback(engineRef: Long)
+    external fun stopPlayback(engineRef: Long)
+    external fun record(engineRef: Long)
+    external fun stopRecord(engineRef: Long)
 
     private fun adjustDefaultStreamValue() {
         val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager
