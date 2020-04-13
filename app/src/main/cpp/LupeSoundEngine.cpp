@@ -16,8 +16,12 @@ LupeSoundEngine::LupeSoundEngine() : mLupeSynth(oboe::DefaultStreamValues::Sampl
             ->setChannelCount(kChannelCount)
             ->setSampleRate(sampleRate)
             ->setFormat(oboe::AudioFormat::Float)
-            ->setCallback(this)
-            ->openManagedStream(mOutStream);
+            ->setCallback(this);
+
+    oboe::Result result = builder.openManagedStream(mOutStream);
+    if (result != oboe::Result::OK) {
+        LOGE("Error opening managed stream: %s", oboe::convertToText(result));
+    }
 
     int streamFramesPerBurst = mOutStream->getFramesPerBurst();
     LOGD("Stream framesPerBurst: %d", streamFramesPerBurst);
@@ -31,7 +35,10 @@ void LupeSoundEngine::start() {
     LOGD("Engine state: %d]", state);
     if (state < oboe::StreamState::Starting || state > oboe::StreamState::Pausing) {
         LOGD("Engine start");
-        mOutStream->start();
+        oboe::Result result = mOutStream->start();
+        if (result != oboe::Result::OK) {
+            LOGE("Error starting out stream: %s", oboe::convertToText(result));
+        }
     }
     mPlaySynth = true;
 }
@@ -40,7 +47,10 @@ void LupeSoundEngine::stop() {
     LOGD("Engine state: %d]", mOutStream->getState());
     if (mOutStream->getState() < oboe::StreamState::Pausing) {
         LOGD("Engine pause");
-        mOutStream->pause();
+        oboe::Result result = mOutStream->pause();
+        if (result != oboe::Result::OK) {
+            LOGE("Error pausing out stream: %s", oboe::convertToText(result));
+        }
     }
     mPlaySynth = false;
 }
