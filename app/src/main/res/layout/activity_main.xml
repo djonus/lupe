@@ -16,15 +16,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <Button
         android:id="@+id/synth_pad"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="8dp"
-        android:background="#EEEEEE"
+        android:layout_margin="16dp"
         android:gravity="center"
-        android:padding="16dp"
-        android:text="X Y Synth pad (R2D2)"
+        android:padding="24dp"
+        android:text="R2D2 X Y synth pad"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
