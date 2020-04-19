@@ -20,6 +20,7 @@ add_library( # Sets the name of the library.
         native-lib.cpp
         jni-bridge.cpp
         LupeSynth.cpp
+        LupeLooper.cpp
         LupeSoundEngine.cpp
         )
 

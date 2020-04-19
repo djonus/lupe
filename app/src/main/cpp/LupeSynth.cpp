@@ -1,9 +1,5 @@
-#ifndef LUPE_SINTH_H
-#define LUPE_SINTH_H
-
 #include "LupeSynth.h"
 #include <oboe/Oboe.h>
-#include <cmath>
 #include "utils/logging.h"
 
 LupeSynth::LupeSynth(int sampleRate) {
@@ -12,7 +8,7 @@ LupeSynth::LupeSynth(int sampleRate) {
 }
 
 void LupeSynth::control(double x, double y) {
-    LOGD("LupeSynth controlled: [state:%d] [x:%f] [y:%f]", x, y);
+    LOGD("LupeSynth controlled: [x:%f] [y:%f]", x, y);
 
     mX = x;
     mY = y;
@@ -22,10 +18,12 @@ void LupeSynth::control(double x, double y) {
 }
 
 float LupeSynth::sample() {
-    float result = mAmplitude * sinf(mPhase);
-    mPhase += mPhaseIncrement;
-    if (mPhase >= kTwoPi) mPhase -= kTwoPi;
-    return result;
+    if (mIsOn) {
+        float result = mAmplitude * sinf(mPhase);
+        mPhase += mPhaseIncrement;
+        if (mPhase >= kTwoPi) mPhase -= kTwoPi;
+        return result;
+    } else {
+        return 0;
+    }
 }
-
-#endif //LUPE_SINTH_H

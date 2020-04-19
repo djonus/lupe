@@ -45,10 +45,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val stopText = "stop"
-        val playText = "play"
-        b_play.text = playText
-        b_play.setOnClickListener {
-            b_play.text = when (b_play.text) {
+        val playText = "start"
+        b_2.text = playText
+        b_2.setOnClickListener {
+            b_2.text = when (b_2.text) {
                 playText -> {
                     startPlayback(engineRef)
                     stopText
@@ -60,11 +60,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val stopRecordText = "cut"
+        val stopRecordText = "stop recording"
         val recordText = "record"
-        b_record.text = recordText
-        b_record.setOnClickListener {
-            b_record.text = when (b_record.text) {
+        b_1.text = recordText
+        b_1.setOnClickListener {
+            b_1.text = when (b_1.text) {
                 recordText -> {
                     record(engineRef)
                     stopRecordText
@@ -74,6 +74,16 @@ class MainActivity : AppCompatActivity() {
                     recordText
                 }
             }
+        }
+
+        b_3.text = "save candidate"
+        b_3.setOnClickListener {
+            saveCandidate(engineRef)
+        }
+
+        b_4.text = "drop last loop"
+        b_4.setOnClickListener {
+            dropLastLoop(engineRef)
         }
     }
 
@@ -86,6 +96,8 @@ class MainActivity : AppCompatActivity() {
     external fun stopPlayback(engineRef: Long)
     external fun record(engineRef: Long)
     external fun stopRecord(engineRef: Long)
+    external fun saveCandidate(engineRef: Long)
+    external fun dropLastLoop(engineRef: Long)
 
     private fun adjustDefaultStreamValue() {
         val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager

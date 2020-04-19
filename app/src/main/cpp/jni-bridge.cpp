@@ -43,7 +43,7 @@ Java_com_djonus_lupe_MainActivity_playSynth(
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
     engine->mLupeSynth.control(x, y);
-    engine->start();
+    engine->mLupeSynth.on();
 }
 
 JNIEXPORT void JNICALL
@@ -53,7 +53,7 @@ Java_com_djonus_lupe_MainActivity_stopSynth(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->stop();
+    engine->mLupeSynth.off();
 }
 
 JNIEXPORT void JNICALL
@@ -63,7 +63,7 @@ Java_com_djonus_lupe_MainActivity_startPlayback(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->startPlayback();
+    engine->start();
 }
 
 JNIEXPORT void JNICALL
@@ -73,7 +73,7 @@ Java_com_djonus_lupe_MainActivity_stopPlayback(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->stopPlayback();
+    engine->stop();
 }
 
 JNIEXPORT void JNICALL
@@ -83,7 +83,7 @@ Java_com_djonus_lupe_MainActivity_record(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->record();
+    engine->mLooper.record();
 }
 
 JNIEXPORT void JNICALL
@@ -93,7 +93,27 @@ Java_com_djonus_lupe_MainActivity_stopRecord(
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->stopRecord();
+    engine->mLooper.stopRecording();
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_dropLastLoop(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->mLooper.dropLast();
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_saveCandidate(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->mLooper.saveCandidate();
 }
 }
 

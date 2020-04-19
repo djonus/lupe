@@ -3,154 +3,105 @@
 #include "LupeSoundEngine.h"
 #include "utils/logging.h"
 
-LupeSoundEngine::LupeSoundEngine() : mLupeSynth(oboe::DefaultStreamValues::SampleRate) {
+LupeSoundEngine::LupeSoundEngine() :
+mLupeSynth(oboe::DefaultStreamValues::SampleRate),
+mLooper(oboe::DefaultStreamValues::SampleRate, mInputChannelCount) {
     LOGD("Hello from LupeSoundEngine");
-    LOGD("Default frames per burst: %d", oboe::DefaultStreamValues::FramesPerBurst);
+    LOGD("Default framesPerBurst: %d", oboe::DefaultStreamValues::FramesPerBurst);
 
     int sampleRate = oboe::DefaultStreamValues::SampleRate;
     LOGD("Sample rate: %d", sampleRate);
 
-    oboe::AudioStreamBuilder builder;
+    oboe::AudioStreamBuilder outBuilder;
     // The builder set methods can be chained for convenience.
-    builder.setFormat(mFormat)
+    outBuilder.setFormat(mFormat)
             ->setSharingMode(oboe::SharingMode::Exclusive)
             ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
             ->setSampleRate(sampleRate)
             ->setChannelCount(mOutputChannelCount)
             ->setCallback(this);
 
-    oboe::Result result = builder.openManagedStream(mOutStream);
+    oboe::Result result = outBuilder.openManagedStream(mOutStream);
     if (result != oboe::Result::OK) {
-        LOGE("Error opening managed stream: %s", oboe::convertToText(result));
+        LOGE("Error opening output stream: %s", oboe::convertToText(result));
     }
 
-    int streamFramesPerBurst = mOutStream->getFramesPerBurst();
-    LOGD("Stream framesPerBurst: %d", streamFramesPerBurst);
+    int outFramesPerBurst = mOutStream->getFramesPerBurst();
+    LOGD("Out stream framesPerBurst: %d", outFramesPerBurst);
+    mOutStream->setBufferSizeInFrames(outFramesPerBurst * 2);
 
-    mOutStream->setBufferSizeInFrames(streamFramesPerBurst * 2);
+
+    // Setup input
+
+    oboe::AudioStreamBuilder inBuilder;
+    inBuilder.setFormat(mFormat)
+            ->setSharingMode(oboe::SharingMode::Exclusive)
+            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+            ->setDirection(oboe::Direction::Input)
+            ->setChannelCount(mInputChannelCount)
+            ->setCallback(&mLooper);
+
+    oboe::Result r = inBuilder.openManagedStream(mInStream);
+    if (r != oboe::Result::OK) {
+        LOGE("Error opening input stream: %s", oboe::convertToText(r));
+    }
+
+    int inFramesPerBurst = mInStream->getFramesPerBurst();
+    LOGD("In stream framesPerBurst: %d", inFramesPerBurst);
+    mInStream->setBufferSizeInFrames(inFramesPerBurst * 2);
 }
 
 void LupeSoundEngine::start() {
-    oboe::StreamState state = mOutStream->getState();
-
-    LOGD("Engine state: %d]", state);
-    if (state < oboe::StreamState::Starting || state > oboe::StreamState::Pausing) {
-        LOGD("Engine start");
+    // Out
+    oboe::StreamState outState = mOutStream->getState();
+    LOGD("Out stream state: %d]", outState);
+    if (outState < oboe::StreamState::Starting || outState > oboe::StreamState::Pausing) {
+        LOGD("Start out stream");
         oboe::Result result = mOutStream->start();
         if (result != oboe::Result::OK) {
             LOGE("Error starting out stream: %s", oboe::convertToText(result));
         }
     }
+
+    // In
+    oboe::StreamState inState = mInStream->getState();
+    LOGD("In stream state: %d]", inState);
+    if (inState < oboe::StreamState::Starting || outState > oboe::StreamState::Pausing) {
+        LOGD("Start in stream");
+        oboe::Result result = mInStream->start();
+        if (result != oboe::Result::OK) {
+            LOGE("Error starting in stream: %s", oboe::convertToText(result));
+        }
+    }
 }
 
 void LupeSoundEngine::stop() {
-    LOGD("Engine state: %d]", mOutStream->getState());
+    // Out
+    LOGD("Out stream state: %d]", mOutStream->getState());
     if (mOutStream->getState() < oboe::StreamState::Pausing) {
-        LOGD("Engine pause");
-        oboe::Result result = mOutStream->pause();
+        LOGD("Stop out stream");
+        oboe::Result result = mOutStream->stop();
         if (result != oboe::Result::OK) {
-            LOGE("Error pausing out stream: %s", oboe::convertToText(result));
+            LOGE("Error stopping out stream: %s", oboe::convertToText(result));
         }
     }
-}
 
-void LupeSoundEngine::startPlayback() {
-    LOGD("Engine start playback");
-    mIsPlayBackOn = true;
-}
-
-void LupeSoundEngine::stopPlayback() {
-    LOGD("Engine stop playback");
-    mIsPlayBackOn = false;
-}
-
-void LupeSoundEngine::record() {
-    LOGD("Engine record");
-
-    oboe::AudioStreamBuilder builder;
-    builder.setFormat(mFormat)
-            ->setSharingMode(oboe::SharingMode::Exclusive)
-            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-            ->setDirection(oboe::Direction::Input)
-            ->setChannelCount(mInputChannelCount)
-            ->setCallback(nullptr);
-
-    oboe::AudioStream *stream;
-    oboe::Result r = builder.openStream(&stream);
-    if (r != oboe::Result::OK) {
-        LOGE("Error opening recording stream: %s", oboe::convertToText(r));
-    }
-
-    r = stream->requestStart();
-    if (r != oboe::Result::OK) {
-        LOGE("Error starting recording stream: %s", oboe::convertToText(r));
-    }
-
-    constexpr  int kMillisecondsToRecord = 2;
-    const int32_t bufferSize = (int32_t)(kMillisecondsToRecord * (stream->getSampleRate() / kMillisecondsToRecord));
-    std::unique_ptr<float[]> mInputBuffer = std::make_unique<float[]>(bufferSize);
-
-    constexpr int64_t kNanosecondsInMillisecond = 1000000;
-    constexpr int64_t kTimeoutValue = 3 * kNanosecondsInMillisecond;
-
-    int framesRead = 0;
-    do {
-        auto result = stream->read(mInputBuffer.get(), stream->getBufferSizeInFrames(), 0);
-        if (result != oboe::Result::OK) break;
-        framesRead = result.value();
-    } while (framesRead != 0);
-
-    mRecording.clear();
-    mIsRecording = true;
-    mRecordingCursor = 0;
-    int16_t burstsToRead = 3000;
-    int16_t burstI = 0;
-    while (mIsRecording) {
-        auto result = stream->read(mInputBuffer.get(), bufferSize, kTimeoutValue);
-        if (result == oboe::Result::OK) {
-            const int32_t actualFrames = result.value();
-            LOGD("Red %d frames", actualFrames);
-            burstI++;
-            if (burstsToRead <= burstI) {
-                mIsRecording = false;
-            }
-            for (int i = 0; i < actualFrames ; ++i) {
-                mRecording.push_back(mInputBuffer.get()[i]);
-            }
-        } else {
-            LOGE("Error reading recording stream: %s", oboe::convertToText(result.error()));
-            mIsRecording = false;
+    // In
+    LOGD("In stream state: %d]", mInStream->getState());
+    if (mInStream->getState() < oboe::StreamState::Pausing) {
+        LOGD("Stop in stream");
+        oboe::Result result = mInStream->stop();
+        if (result != oboe::Result::OK) {
+            LOGE("Error stopping in stream: %s", oboe::convertToText(result));
         }
     }
-    stream->close();
-}
-
-void LupeSoundEngine::stopRecord(){
-    LOGD("Engine stop record");
-    mIsRecording = false;
 }
 
 oboe::DataCallbackResult
 LupeSoundEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
     auto *floatData = (float *) audioData;
     for (int i = 0; i < numFrames; ++i) {
-        float sampleValue;
-        if (mIsPlayBackOn) {
-            mRecordingCursor++;
-            if (mRecordingCursor == mRecording.size()) {
-                mRecordingCursor = 0;
-            }
-            sampleValue = mRecording[mRecordingCursor];
-
-            int samplesPerGap = 18000;
-            int gaps = mRecordingCursor / samplesPerGap;
-
-            for (int j = 1; j < gaps; ++j) {
-                sampleValue += recorderdingSample(samplesPerGap * -j, 1.0F / powf(j + 0.3F, 3));
-            }
-        } else {
-            sampleValue = mLupeSynth.sample();
-        }
+        float sampleValue = mLupeSynth.sample() + mLooper.sample();
         for (int j = 0; j < mOutputChannelCount; j++) {
             floatData[i * mOutputChannelCount + j] = sampleValue;
         }
