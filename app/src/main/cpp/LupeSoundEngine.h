@@ -4,6 +4,7 @@
 #include <oboe/Oboe.h>
 #include <math.h>
 #include "LupeSynth.h"
+#include <vector>
 
 class LupeSoundEngine : public oboe::AudioStreamCallback {
 public:
@@ -25,9 +26,23 @@ public:
 private:
 
     oboe::ManagedStream mOutStream;
-    bool mPlaySynth = false;
+
+    bool mIsRecording = false;
+    bool mIsPlayBackOn = false;
+    std::vector<float> mRecording;
+    int32_t mRecordingCursor = 0;
     // Stream params
-    static int constexpr kChannelCount = 1;
+    oboe::AudioFormat mFormat = oboe::AudioFormat::Float;
+    int32_t mInputChannelCount = oboe::ChannelCount::Mono;
+    int32_t mOutputChannelCount = oboe::ChannelCount::Stereo;
+
+    float recorderdingSample(int32_t samplesToSkip, float factor) {
+        int32_t cursor = mRecordingCursor + samplesToSkip;
+        if (cursor >= mRecording.size()) {
+            cursor = mRecording.size();
+        }
+        return mRecording[cursor] * factor;
+    }
 };
 
 #endif //LUPE_SINEPLAYER_H
