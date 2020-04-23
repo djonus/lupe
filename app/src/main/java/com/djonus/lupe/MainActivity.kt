@@ -7,9 +7,13 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import com.djonus.lupe.utils.exponential
 import com.djonus.lupe.utils.normalize
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -85,6 +89,26 @@ class MainActivity : AppCompatActivity() {
         b_4.setOnClickListener {
             dropLastLoop(engineRef)
         }
+
+        GlobalScope.launch {
+            while (true) {
+                delay(33)
+                val cursorData = getLoopCursors(engineRef)
+                displayCursors(cursorData)
+            }
+        }
+    }
+
+    private fun displayCursors(cursorData: IntArray) {
+        val width = loops.width
+        val cursors = cursorData.asIterable().chunked(2)
+        cursors.forEachIndexed { index, cursor ->
+            val progress = cursor[1].toFloat() / cursor[0].toFloat()
+            loops[index].translationX = width * progress
+        }
+        for (i in cursors.size until loops.childCount) {
+            loops[i].translationX = 0f
+        }
     }
 
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
@@ -98,6 +122,7 @@ class MainActivity : AppCompatActivity() {
     external fun stopRecord(engineRef: Long)
     external fun saveCandidate(engineRef: Long)
     external fun dropLastLoop(engineRef: Long)
+    external fun getLoopCursors(engineRef: Long): IntArray
 
     private fun adjustDefaultStreamValue() {
         val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager

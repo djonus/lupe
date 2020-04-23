@@ -115,5 +115,27 @@ Java_com_djonus_lupe_MainActivity_saveCandidate(
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
     engine->mLooper.saveCandidate();
 }
+
+JNIEXPORT jintArray JNICALL
+Java_com_djonus_lupe_MainActivity_getLoopCursors(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+
+    std::vector<Loop> loops = engine->mLooper.mLoops;
+    std::vector<int32_t > cursorData;
+
+    for (int i = 0; i < loops.size(); ++i) {
+        cursorData.push_back(loops[i].size());
+        cursorData.push_back(loops[i].cursor());
+    }
+
+    jintArray converted  = env->NewIntArray(cursorData.size());
+    env->SetIntArrayRegion(converted, 0, cursorData.size(), &cursorData[0]);
+
+    return converted;
+}
 }
 

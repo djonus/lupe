@@ -15,7 +15,7 @@
         android:padding="24dp"
         android:text="R2D2 X Y synth pad"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
-        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintDimensionRatio="2:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -71,5 +71,66 @@
         app:layout_constraintEnd_toEndOf="@id/b_2"
         app:layout_constraintStart_toStartOf="@id/b_2"
         app:layout_constraintTop_toBottomOf="@id/b_2" />
+
+    <LinearLayout
+        android:id="@+id/loops"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/b_4">
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="1"
+            android:background="#FF0000" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,7 +11,8 @@ public:
 
     Loop() = default;
 
-    Loop(std::vector<float> loop) {
+    Loop(std::string id, std::vector<float> loop) {
+        mId = id;
         mLoop = loop;
     };
 
@@ -28,10 +29,19 @@ public:
         return mCursor;
     }
 
+    std::string id() {
+        mId;
+    }
+
+    void setId(std::string id) {
+        mId = id;
+    }
+
 
 private:
     std::vector<float> mLoop;
     int32_t mCursor = 0;
+    std::string mId;
 };
 
 

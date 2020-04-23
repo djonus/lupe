@@ -22,7 +22,7 @@ public:
 
         if (mSamplesPerTape == 0 && mTape.size() > 0) {
             LOGD("Save save initial loop");
-            Loop initialLoop = Loop(mTape);
+            Loop initialLoop = Loop("1", mTape);
             mLoops.push_back(initialLoop);
             mSamplesPerTape = initialLoop.size();
             resetTape();
@@ -34,6 +34,8 @@ public:
     void saveCandidate() {
         if (mLoopCandidate.size() > 0) {
             LOGD("Save candidate loop");
+            std::string id = std::to_string(mLoops.size());
+            mLoopCandidate.setId(id);
             mLoops.push_back(mLoopCandidate);
         }
     }
@@ -50,6 +52,9 @@ public:
         }
     }
 
+    Loop mLoopCandidate;
+    std::vector<Loop> mLoops;
+
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) override;
 
 private:
@@ -63,8 +68,6 @@ private:
     int32_t mSamplesPerTape = 0;
     std::vector<float> mTape;
     int32_t mTapeCursor = 0;
-    Loop mLoopCandidate;
-    std::vector<Loop> mLoops;
 
     int32_t mSampleCursor = 0;
 
