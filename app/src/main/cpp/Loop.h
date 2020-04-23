@@ -15,13 +15,9 @@ public:
         mLoop = loop;
     };
 
-    float sample() {
-        float sample = mLoop[mCursor];
-        mCursor++;
-        if (mCursor >= mLoop.size()) {
-            mCursor = 0;
-        }
-        return sample;
+    float sample(int32_t cursor) {
+        mCursor = cursor % mLoop.size();
+        return mLoop[mCursor];;
     }
 
     int32_t size() {

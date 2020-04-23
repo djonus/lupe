@@ -33,8 +33,8 @@ public:
 
     void saveCandidate() {
         if (mLoopCandidate.size() > 0) {
-            LOGD("Save loop");
-            mLoopQueued = mLoopCandidate;
+            LOGD("Save candidate loop");
+            mLoops.push_back(mLoopCandidate);
         }
     }
 
@@ -64,12 +64,14 @@ private:
     std::vector<float> mTape;
     int32_t mTapeCursor = 0;
     Loop mLoopCandidate;
-    Loop mLoopQueued;
     std::vector<Loop> mLoops;
+
+    int32_t mSampleCursor = 0;
 
     void resetTape() {
         mTape.clear();
         mTapeCursor = 0;
+        mSampleCursor = 0;
         mRecordingIsEmpty = true;
     }
 
