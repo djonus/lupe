@@ -16,6 +16,9 @@ float LupeLooper::sample() {
     if (mLoops.size() > 0) {
         mSampleCursor++;
     }
+    if (mSampleCursor > mSampleSize) {
+        mSampleCursor = 0;
+    }
     return sample;
 }
 
@@ -29,11 +32,11 @@ LupeLooper::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t
                 mRecordingIsEmpty = false;
                 mTapeCursor++;
             }
-            else if (mSamplesPerTape > 0) { // mSamplesPerTape set on first stopRecording
+            else if (mTapeSize > 0) { // mSamplesPerTape set on first stopRecording
                 mTape.push_back(0);
                 mTapeCursor++;
             }
-            if (mSamplesPerTape > 0 && mTapeCursor >= mSamplesPerTape) {
+            if (mTapeSize > 0 && mTapeCursor >= mTapeSize) {
                 LOGD("Full loop");
                 if (!mRecordingIsEmpty) {
                     LOGD("Update candidate");

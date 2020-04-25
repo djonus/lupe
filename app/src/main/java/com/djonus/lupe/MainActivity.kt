@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import com.djonus.lupe.utils.exponential
@@ -90,6 +91,42 @@ class MainActivity : AppCompatActivity() {
             dropLastLoop(engineRef)
         }
 
+        val multipliers = arrayOf(
+            "x1/8" to 1.0/8,
+            "x1/7" to 1.0/7,
+            "x1/6" to 1.0/6,
+            "x1/5" to 1.0/5,
+            "x1/4" to 1.0/4,
+            "x1/3" to 1.0/3,
+            "x1/2" to 1.0/2,
+            "x1" to 1.0,
+            "x2" to 2.0,
+            "x3" to 3.0,
+            "x4" to 4.0,
+            "x5" to 5.0,
+            "x6" to 6.0,
+            "x7" to 7.0,
+            "x8" to 8.0
+        )
+        sb_1.max = multipliers.size - 1
+        val defaultMultiplier = multipliers[7]
+        sb_1.setProgress(7, true)
+        tv_multiplier.text = defaultMultiplier.first
+        sb_1.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val multiplier = multipliers[progress]
+                tv_multiplier.text = multiplier.first
+                setTapeSizeMultiplier(engineRef, multiplier.second)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+
+        })
+
         GlobalScope.launch {
             while (true) {
                 delay(33)
@@ -101,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayCursors(cursorData: IntArray) {
         val width = loops.width
-        val cursors = cursorData.asIterable().chunked(2)
+        val cursors = cursorData.asIterable().chunked(2).takeLast(loops.childCount).reversed()
         cursors.forEachIndexed { index, cursor ->
             val progress = cursor[1].toFloat() / cursor[0].toFloat()
             loops[index].translationX = width * progress
@@ -123,6 +160,7 @@ class MainActivity : AppCompatActivity() {
     external fun saveCandidate(engineRef: Long)
     external fun dropLastLoop(engineRef: Long)
     external fun getLoopCursors(engineRef: Long): IntArray
+    external fun setTapeSizeMultiplier(engineRef: Long, multiplier: Double)
 
     private fun adjustDefaultStreamValue() {
         val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager

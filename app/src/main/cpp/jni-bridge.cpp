@@ -116,6 +116,17 @@ Java_com_djonus_lupe_MainActivity_saveCandidate(
     engine->mLooper.saveCandidate();
 }
 
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_setTapeSizeMultiplier(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle,
+        jdouble multiplier) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->mLooper.setTapeSizeMultiplier(multiplier);
+}
+
 JNIEXPORT jintArray JNICALL
 Java_com_djonus_lupe_MainActivity_getLoopCursors(
         JNIEnv *env,
@@ -131,6 +142,9 @@ Java_com_djonus_lupe_MainActivity_getLoopCursors(
         cursorData.push_back(loops[i].size());
         cursorData.push_back(loops[i].cursor());
     }
+
+    cursorData.push_back(engine->mLooper.mTapeSize);
+    cursorData.push_back(engine->mLooper.mTapeCursor);
 
     jintArray converted  = env->NewIntArray(cursorData.size());
     env->SetIntArrayRegion(converted, 0, cursorData.size(), &cursorData[0]);
