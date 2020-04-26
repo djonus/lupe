@@ -4,8 +4,8 @@
 #include "utils/logging.h"
 
 LupeSoundEngine::LupeSoundEngine() :
-mLupeSynth(oboe::DefaultStreamValues::SampleRate),
-mLooper(oboe::DefaultStreamValues::SampleRate, mInputChannelCount) {
+        mLupeSynth(oboe::DefaultStreamValues::SampleRate),
+        mLooper(oboe::DefaultStreamValues::SampleRate, mInputChannelCount) {
     LOGD("Hello from LupeSoundEngine");
     LOGD("Default framesPerBurst: %d", oboe::DefaultStreamValues::FramesPerBurst);
 
