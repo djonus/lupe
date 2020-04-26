@@ -5,6 +5,7 @@
 #include <math.h>
 #include "LupeSynth.h"
 #include "LupeLooper.h"
+#include "FxDelay.h"
 #include <vector>
 
 class LupeSoundEngine : public oboe::AudioStreamCallback {
@@ -29,6 +30,8 @@ private:
     oboe::AudioFormat mFormat = oboe::AudioFormat::Float;
     static int32_t const mInputChannelCount = oboe::ChannelCount::Mono;
     static int32_t const mOutputChannelCount = oboe::ChannelCount::Stereo;
+
+    FxDelay mSynthDelay;
 };
 
 #endif //LUPE_SINEPLAYER_H

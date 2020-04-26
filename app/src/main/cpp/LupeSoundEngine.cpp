@@ -49,6 +49,9 @@ mLooper(oboe::DefaultStreamValues::SampleRate, mInputChannelCount) {
     int inFramesPerBurst = mInStream->getFramesPerBurst();
     LOGD("In stream framesPerBurst: %d", inFramesPerBurst);
     mInStream->setBufferSizeInFrames(inFramesPerBurst * 2);
+
+    mSynthDelay.setDecay(0.6f);
+    mSynthDelay.setDelay(16000);
 }
 
 void LupeSoundEngine::start() {
@@ -101,7 +104,7 @@ oboe::DataCallbackResult
 LupeSoundEngine::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
     auto *floatData = (float *) audioData;
     for (int i = 0; i < numFrames; ++i) {
-        float sampleValue = mLupeSynth.sample() + mLooper.sample();
+        float sampleValue = mSynthDelay.sample(mLupeSynth.sample()) + mLooper.sample();
         for (int j = 0; j < mOutputChannelCount; j++) {
             floatData[i * mOutputChannelCount + j] = sampleValue;
         }

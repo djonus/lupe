@@ -90,26 +90,6 @@ private:
         mTapeCursor = 0;
         mRecordingIsEmpty = true;
     }
-
-//    float delayFx(float originalSample) {
-//        float sampleValue = originalSample;
-//        int samplesPerGap = 18000;
-//        int gaps = mRecordingCursor / samplesPerGap;
-//
-//        for (int j = 1; j < gaps; ++j) {
-//            sampleValue += recorderdingSample(samplesPerGap * -j, 1.0F / powf(j + 0.3F, 3));
-//        }
-//        return sampleValue;
-//    }
-//
-//    float recorderdingSample(int32_t samplesToSkip, float factor) {
-//        int32_t cursor = mRecordingCursor + samplesToSkip;
-//        if (cursor >= mRecording.size()) {
-//            cursor = mRecording.size();
-//        }
-//        return mRecording[cursor] * factor;
-//    }
-
 };
 
 #endif //LUPE_LOOPER_H
