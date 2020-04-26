@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val frequencyRange: ClosedRange<Double> = 20.0..20000.0
-    private val frequencyExponentialFactor = 2.0
+    private val frequencyExponentialFactor = 3.2
     private val amplitudeRange: ClosedRange<Double> = 0.0..2.0
     private val amplitudeExponentialFactor = 2.0
 
