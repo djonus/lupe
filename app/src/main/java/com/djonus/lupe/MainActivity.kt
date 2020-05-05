@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.lifecycle.lifecycleScope
 import com.djonus.lupe.utils.exponential
 import com.djonus.lupe.utils.normalize
 import kotlinx.android.synthetic.main.activity_main.*
@@ -127,7 +128,7 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-        GlobalScope.launch {
+        lifecycleScope.launch {
             while (true) {
                 delay(33)
                 val cursorData = getLoopCursors(engineRef)
