@@ -69,7 +69,8 @@ class MainActivity : AppCompatActivity() {
         val stopRecordText = "stop recording"
         val recordText = "record"
         b_1.text = recordText
-        b_1.setOnClickListener {
+        // using touch listener for faster response
+        b_1.setTouchEventListener(MotionEvent.ACTION_DOWN) {
             b_1.text = when (b_1.text) {
                 recordText -> {
                     record(engineRef)
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         b_3.text = "save candidate"
-        b_3.setOnClickListener {
+        b_3.setTouchEventListener(MotionEvent.ACTION_DOWN) {
             saveCandidate(engineRef)
         }
 
@@ -197,4 +198,12 @@ class MainActivity : AppCompatActivity() {
             System.loadLibrary("native-lib")
         }
     }
+
+    private fun View.setTouchEventListener(action: Int, listener: (View) -> Unit) =
+        setOnTouchListener { v, event ->
+            when (event.action) {
+                action -> listener(v)
+            }
+            false
+        }
 }
