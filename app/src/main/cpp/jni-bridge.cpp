@@ -151,5 +151,30 @@ Java_com_djonus_lupe_MainActivity_getLoopCursors(
 
     return converted;
 }
+
+JNIEXPORT jintArray JNICALL
+Java_com_djonus_lupe_MainActivity_getTrackDetails(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+
+    std::vector<Loop> loops = engine->mLooper.mLoops;
+    std::vector<int32_t > trackData;
+
+    for (int i = 0; i < loops.size(); ++i) {
+        int32_t id = loops[i].id();
+        trackData.push_back(id);
+    }
+
+    trackData.push_back(-1); // candidate
+    trackData.push_back(-2); // master
+
+    jintArray converted  = env->NewIntArray(trackData.size());
+    env->SetIntArrayRegion(converted, 0, trackData.size(), &trackData[0]);
+
+    return converted;
+}
 }
 

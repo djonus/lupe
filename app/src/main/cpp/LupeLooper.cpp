@@ -40,7 +40,7 @@ LupeLooper::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t
                 LOGD("Full loop");
                 if (!mRecordingIsEmpty) {
                     LOGD("Update candidate");
-                    mLoopCandidate = Loop("0", mTape);
+                    mLoopCandidate = Loop(-1, mTape);
                 }
 
                 resetTape();

@@ -23,7 +23,7 @@ public:
 
         if (mTapeSize == 0 && mTape.size() > 0) {
             LOGD("Save save initial loop");
-            Loop initialLoop = Loop("1", mTape);
+            Loop initialLoop = Loop(0, mTape);
             mLoops.push_back(initialLoop);
             mTapeSize = initialLoop.size();
             mSampleSize = mTapeSize * 840; //840 is least common multiplier for of tape size multipliers
@@ -35,8 +35,7 @@ public:
     void saveCandidate() {
         if (mLoopCandidate.size() > 0) {
             LOGD("Save candidate loop");
-            std::string id = std::to_string(mLoops.size());
-            mLoopCandidate.setId(id);
+            mLoopCandidate.setId(mLoops.size());
             mLoops.push_back(mLoopCandidate);
         }
     }

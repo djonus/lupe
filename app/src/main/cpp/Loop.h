@@ -11,14 +11,14 @@ public:
 
     Loop() = default;
 
-    Loop(std::string id, std::vector<float> loop) {
+    Loop(int32_t id, std::vector<float> loop) {
         mId = id;
         mLoop = loop;
     };
 
     float sample(int32_t cursor) {
         mCursor = cursor % mLoop.size();
-        return mLoop[mCursor];;
+        return mLoop[mCursor];
     }
 
     int32_t size() {
@@ -29,11 +29,11 @@ public:
         return mCursor;
     }
 
-    std::string id() {
-        mId;
+    int32_t id() {
+        return mId;
     }
 
-    void setId(std::string id) {
+    void setId(int32_t id) {
         mId = id;
     }
 
@@ -41,7 +41,7 @@ public:
 private:
     std::vector<float> mLoop;
     int32_t mCursor = 0;
-    std::string mId;
+    int32_t mId;
 };
 
 

@@ -6,14 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import com.djonus.lupe.utils.exponential
 import com.djonus.lupe.utils.normalize
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -81,16 +82,19 @@ class MainActivity : AppCompatActivity() {
                     recordText
                 }
             }
+            refreshTrackDetails(engineRef)
         }
 
         b_3.text = "save candidate"
         b_3.setTouchEventListener(MotionEvent.ACTION_DOWN) {
             saveCandidate(engineRef)
+            refreshTrackDetails(engineRef)
         }
 
         b_4.text = "drop last loop"
         b_4.setOnClickListener {
             dropLastLoop(engineRef)
+            refreshTrackDetails(engineRef)
         }
 
         val multipliers = arrayOf(
@@ -143,12 +147,31 @@ class MainActivity : AppCompatActivity() {
         val cursors = cursorData.asIterable().chunked(2).takeLast(loops.childCount).reversed()
         cursors.forEachIndexed { index, cursor ->
             val progress = cursor[1].toFloat() / cursor[0].toFloat()
-            loops[index].translationX = width * progress
+            getTrackCursorView(index).translationX = width * progress
         }
         for (i in cursors.size until loops.childCount) {
-            loops[i].translationX = 0f
+            getTrackCursorView(i).translationX = 0f
         }
     }
+
+    private fun refreshTrackDetails(engineRef: Long) {
+        val trackDetails = getTrackDetails(engineRef)
+        val details = trackDetails.asIterable()
+            .chunked(1)
+            .dropLast(1) // master
+            .takeLast(loops.childCount)
+            .reversed()
+
+        details.forEachIndexed { index, d ->
+            getTrackTitleView(index).text = d[0].toString()
+        }
+        for (i in details.size until loops.childCount) {
+            getTrackTitleView(i).text = null
+        }
+    }
+
+    private fun getTrackCursorView(index: Int): View = (loops[index] as ViewGroup)[1]
+    private fun getTrackTitleView(index: Int): TextView = (loops[index] as ViewGroup)[0] as TextView
 
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     external fun createEngine(): Long
@@ -162,6 +185,7 @@ class MainActivity : AppCompatActivity() {
     external fun saveCandidate(engineRef: Long)
     external fun dropLastLoop(engineRef: Long)
     external fun getLoopCursors(engineRef: Long): IntArray
+    external fun getTrackDetails(engineRef: Long): IntArray
     external fun setTapeSizeMultiplier(engineRef: Long, multiplier: Double)
 
     private fun adjustDefaultStreamValue() {
