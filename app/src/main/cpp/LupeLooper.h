@@ -40,10 +40,16 @@ public:
         }
     }
 
-    void dropLast() {
+    void deleteLoop(int32_t loopId) {
         if (mLoops.size() > 1) {
-            LOGD("Deleted loop");
-            mLoops.pop_back();
+            for (int i = 0; i < mLoops.size(); ++i) {
+                if (mLoops[i].id() == loopId) {
+                    LOGD("Delete loop with id: %d", loopId);
+                    mLoops.erase(mLoops.cbegin() + i);
+                    return;
+                }
+            }
+            LOGD("Can not delete loop with id: %d", loopId);
         } else if (mLoops.size() == 1) {
             LOGD("Delete last loop");
             mLoops.pop_back();

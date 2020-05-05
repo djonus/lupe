@@ -97,13 +97,14 @@ Java_com_djonus_lupe_MainActivity_stopRecord(
 }
 
 JNIEXPORT void JNICALL
-Java_com_djonus_lupe_MainActivity_dropLastLoop(
+Java_com_djonus_lupe_MainActivity_deleteLoop(
         JNIEnv *env,
         jclass type,
-        jlong engineHandle) {
+        jlong engineHandle,
+        jint loopId) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
-    engine->mLooper.dropLast();
+    engine->mLooper.deleteLoop(loopId);
 }
 
 JNIEXPORT void JNICALL

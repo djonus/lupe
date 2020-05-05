@@ -93,8 +93,10 @@ class MainActivity : AppCompatActivity() {
 
         b_4.text = "drop last loop"
         b_4.setOnClickListener {
-            dropLastLoop(engineRef)
-            refreshTrackDetails(engineRef)
+            val loopId = getTrackDetails(engineRef).dropLast(2).lastOrNull()?.let {
+                deleteLoop(engineRef, it)
+                refreshTrackDetails(engineRef)
+            }
         }
 
         val multipliers = arrayOf(
@@ -183,7 +185,7 @@ class MainActivity : AppCompatActivity() {
     external fun record(engineRef: Long)
     external fun stopRecord(engineRef: Long)
     external fun saveCandidate(engineRef: Long)
-    external fun dropLastLoop(engineRef: Long)
+    external fun deleteLoop(engineRef: Long, loopId: Int)
     external fun getLoopCursors(engineRef: Long): IntArray
     external fun getTrackDetails(engineRef: Long): IntArray
     external fun setTapeSizeMultiplier(engineRef: Long, multiplier: Double)
