@@ -11,13 +11,13 @@ LupeLooper::LupeLooper(int sampleRate, int inputChannelCount) {
 float LupeLooper::sample() {
     float sample = 0;
     for (int i = 0; i < mLoops.size(); ++i) {
-        sample += mLoops[i].sample(mSampleCursor);
+        sample += mLoops[i].sample(mCommonLoopCursor);
     }
     if (mLoops.size() > 0) {
-        mSampleCursor++;
+        mCommonLoopCursor++;
     }
-    if (mSampleCursor > mSampleSize) {
-        mSampleCursor = 0;
+    if (mCommonLoopCursor > mCommonLoopLength) {
+        mCommonLoopCursor = 0;
     }
     return sample;
 }
@@ -29,16 +29,15 @@ LupeLooper::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t
         for (int j = 0; j < mInputChannelCount; j++) {
             if (mIsRecording) {
                 mTape.push_back(floatData[i * mInputChannelCount + j]);
-                mRecordingIsEmpty = false;
                 mTapeCursor++;
             }
-            else if (mTapeSize > 0) { // mSamplesPerTape set on first stopRecording
+            else if (mTapeSize > 0) { // mTapeSize set on first stopRecording
                 mTape.push_back(0);
                 mTapeCursor++;
             }
             if (mTapeSize > 0 && mTapeCursor >= mTapeSize) {
                 LOGD("Full loop");
-                if (!mRecordingIsEmpty) {
+                if (mTape.size() > 0) {
                     LOGD("Update candidate");
                     mLoopCandidate = Loop(-1, mTape);
                 }

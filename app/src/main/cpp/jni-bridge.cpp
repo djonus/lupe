@@ -128,6 +128,16 @@ Java_com_djonus_lupe_MainActivity_setTapeSizeMultiplier(
     engine->mLooper.setTapeSizeMultiplier(multiplier);
 }
 
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_clear(
+        JNIEnv *env,
+        jobject obj,
+        jlong engineHandle) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+    engine->mLooper.clear();
+}
+
 JNIEXPORT jintArray JNICALL
 Java_com_djonus_lupe_MainActivity_getLoopCursors(
         JNIEnv *env,
@@ -176,6 +186,74 @@ Java_com_djonus_lupe_MainActivity_getTrackDetails(
     env->SetIntArrayRegion(converted, 0, trackData.size(), &trackData[0]);
 
     return converted;
+}
+
+JNIEXPORT jfloatArray JNICALL
+Java_com_djonus_lupe_MainActivity_sampleTrack(
+        JNIEnv *env,
+        jclass type,
+        jlong engineHandle,
+        jint trackId,
+        jint start,
+        jint size) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+
+    std::vector<Loop> loops = engine->mLooper.mLoops;
+    std::vector<float> trackData;
+
+    if (trackId == -2) { // master
+        float sample = 0;
+        for (int i = start; i < size; ++i) {
+            for (int j = 0; j < loops.size(); ++j) {
+                sample += loops[j].sample(i);
+            }
+            trackData.push_back(sample);
+        }
+    } else if (trackId == -1) { // candidate loop
+        Loop candidate = engine->mLooper.mLoopCandidate;
+        for (int i = start; i < size; ++i) {
+            float sample = candidate.sample(i);
+            trackData.push_back(sample);
+        }
+    } else { // loops
+        for (int i = start; i < size; ++i) {
+            float sample = loops[trackId].sample(i);
+            trackData.push_back(sample);
+        }
+    }
+
+    jfloatArray converted  = env->NewFloatArray(trackData.size());
+    env->SetFloatArrayRegion(converted, 0, trackData.size(), &trackData[0]);
+
+    return converted;
+}
+
+JNIEXPORT void JNICALL
+Java_com_djonus_lupe_MainActivity_loadTrack(
+        JNIEnv *env,
+        jobject thiz,
+        jlong engineHandle,
+        jint trackId,
+        jint start,
+        jfloatArray data) {
+
+    LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
+
+    std::vector<Loop> loops = engine->mLooper.mLoops;
+    std::vector<float> trackData;
+
+    jfloat* converted = env->GetFloatArrayElements(data, 0);
+    int inputDataLength = env->GetArrayLength(data);
+    LOGD("JNI Input track track length: %d", inputDataLength);
+
+    for (int i = 0; i < inputDataLength; ++i) {
+        trackData.push_back(converted[i]);
+    }
+    LOGD("Converted samples count: %d", trackData.size());
+
+    engine->mLooper.add(trackData);
+    env->ReleaseFloatArrayElements(data, converted, JNI_ABORT);
 }
 }
 

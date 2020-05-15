@@ -23,10 +23,7 @@ public:
 
         if (mTapeSize == 0 && mTape.size() > 0) {
             LOGD("Save save initial loop");
-            Loop initialLoop = Loop(0, mTape);
-            mLoops.push_back(initialLoop);
-            mTapeSize = initialLoop.size();
-            mSampleSize = mTapeSize * 840; //840 is least common multiplier for of tape size multipliers
+            add(mTape);
         }
     }
 
@@ -52,11 +49,7 @@ public:
             LOGD("Can not delete loop with id: %d", loopId);
         } else if (mLoops.size() == 1) {
             LOGD("Delete last loop");
-            mLoops.pop_back();
-            mTapeSize = 0;
-            mSampleCursor = 0;
-            mSampleSize = 0;
-            resetTape();
+            clear();
         }
     }
 
@@ -68,10 +61,29 @@ public:
     void setTapeSizeMultiplier(double multiplier) {
         if (mLoops.size() > 0) {
             mTapeSize = mLoops[0].size() * multiplier;
-            mTapeCursor = mSampleCursor % mTapeSize;
+            mTapeCursor = mCommonLoopCursor % mTapeSize;
         } else {
             mTapeSize = 0;
         }
+    }
+
+    void clear() {
+        mIsRecording = false;
+        mCommonLoopCursor = 0;
+        mCommonLoopLength = 0;
+        resetTape();
+        mTapeSize = 0;
+        mLoopCandidate = Loop(-1, mTape);
+        mLoops.clear();
+    }
+
+    void add(std::vector<float> samples) {
+        if (mLoops.size() == 0) {
+            mTapeSize = samples.size();
+            mCommonLoopLength = mTapeSize * 840; //840 is least common multiplier for of tape size multipliers
+        }
+
+        mLoops.push_back(Loop(mLoops.size(), samples));
     }
 
     oboe::DataCallbackResult
@@ -83,17 +95,15 @@ private:
     int mInputChannelCount;
 
     bool mIsRecording = false;
-    bool mRecordingIsEmpty = true;
 
     std::vector<float> mTape;
 
-    int32_t mSampleCursor = 0;
-    int32_t mSampleSize = 0;
+    int32_t mCommonLoopCursor = 0;
+    int32_t mCommonLoopLength = 0;
 
     void resetTape() {
         mTape.clear();
         mTapeCursor = 0;
-        mRecordingIsEmpty = true;
     }
 };
 

@@ -12,11 +12,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
-import com.djonus.lupe.utils.exponential
-import com.djonus.lupe.utils.normalize
+import com.djonus.lupe.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,62 +53,38 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
-        val stopText = "stop"
-        val playText = "start"
-        b_2.text = playText
-        b_2.setOnClickListener {
-            b_2.text = when (b_2.text) {
-                playText -> {
-                    startPlayback(engineRef)
-                    stopText
-                }
-                else -> {
-                    stopPlayback(engineRef)
-                    playText
-                }
-            }
-        }
+        b_start.setOnClickListener { startPlayback(engineRef) }
+        b_stop.setOnClickListener { stopPlayback(engineRef) }
 
-        val stopRecordText = "stop recording"
-        val recordText = "record"
-        b_1.text = recordText
-        // using touch listener for faster response
-        b_1.setTouchEventListener(MotionEvent.ACTION_DOWN) {
-            b_1.text = when (b_1.text) {
-                recordText -> {
-                    record(engineRef)
-                    stopRecordText
-                }
-                else -> {
-                    stopRecord(engineRef)
-                    recordText
-                }
-            }
+        b_record.setTouchEventListener(MotionEvent.ACTION_DOWN) {
+            record(engineRef)
+            refreshTrackDetails(engineRef)
+        }
+        b_stop_record.setTouchEventListener(MotionEvent.ACTION_DOWN) {
+            stopRecord(engineRef)
             refreshTrackDetails(engineRef)
         }
 
-        b_3.text = "save candidate"
-        b_3.setTouchEventListener(MotionEvent.ACTION_DOWN) {
+        b_add.setTouchEventListener(MotionEvent.ACTION_DOWN) {
             saveCandidate(engineRef)
             refreshTrackDetails(engineRef)
         }
 
-        b_4.text = "drop last loop"
-        b_4.setOnClickListener {
-            val loopId = getTrackDetails(engineRef).dropLast(2).lastOrNull()?.let {
+        b_remove.setOnClickListener {
+            getTrackDetails(engineRef).dropLast(2).lastOrNull()?.let {
                 deleteLoop(engineRef, it)
                 refreshTrackDetails(engineRef)
             }
         }
 
         val multipliers = arrayOf(
-            "x1/8" to 1.0/8,
-            "x1/7" to 1.0/7,
-            "x1/6" to 1.0/6,
-            "x1/5" to 1.0/5,
-            "x1/4" to 1.0/4,
-            "x1/3" to 1.0/3,
-            "x1/2" to 1.0/2,
+            "x1/8" to 1.0 / 8,
+            "x1/7" to 1.0 / 7,
+            "x1/6" to 1.0 / 6,
+            "x1/5" to 1.0 / 5,
+            "x1/4" to 1.0 / 4,
+            "x1/3" to 1.0 / 3,
+            "x1/2" to 1.0 / 2,
             "x1" to 1.0,
             "x2" to 2.0,
             "x3" to 3.0,
@@ -142,13 +120,36 @@ class MainActivity : AppCompatActivity() {
                 displayCursors(cursorData)
             }
         }
+
+        b_load.setOnClickListener {
+            lifecycleScope.launch {
+                tv_loading.text = "loading..."
+                stopPlayback(engineRef)
+                clear(engineRef)
+                withContext(Dispatchers.IO) {
+                    loadTracks(engineRef, getProjectTitle())
+                }
+                refreshTrackDetails(engineRef)
+                tv_loading.text = null
+            }
+        }
+        b_save.setOnClickListener {
+            lifecycleScope.launch {
+                tv_loading.text = "saving..."
+                stopPlayback(engineRef)
+                withContext(Dispatchers.IO) {
+                    saveTracks(engineRef, getProjectTitle())
+                }
+                tv_loading.text = null
+            }
+        }
     }
 
     private fun displayCursors(cursorData: IntArray) {
         val width = loops.width
         val cursors = cursorData.asIterable().chunked(2).takeLast(loops.childCount).reversed()
         cursors.forEachIndexed { index, cursor ->
-            val progress = cursor[1].toFloat() / cursor[0].toFloat()
+            val progress = cursor[1].toFloat() / cursor[0].toFloat() // position / size
             getTrackCursorView(index).translationX = width * progress
         }
         for (i in cursors.size until loops.childCount) {
@@ -174,6 +175,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun getTrackCursorView(index: Int): View = (loops[index] as ViewGroup)[1]
     private fun getTrackTitleView(index: Int): TextView = (loops[index] as ViewGroup)[0] as TextView
+    private fun getProjectTitle(): String {
+        val input = et_title_input.text.toString()
+        return if (input.isNullOrBlank()) {
+            "no_title"
+        } else {
+            input
+        }
+    }
 
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     external fun createEngine(): Long
@@ -189,6 +198,52 @@ class MainActivity : AppCompatActivity() {
     external fun getLoopCursors(engineRef: Long): IntArray
     external fun getTrackDetails(engineRef: Long): IntArray
     external fun setTapeSizeMultiplier(engineRef: Long, multiplier: Double)
+    external fun sampleTrack(engineRef: Long, trackId: Int, start: Int, size: Int): FloatArray
+    external fun loadTrack(engineRef: Long, trackId: Int, start: Int, data: FloatArray)
+    external fun clear(engineRef: Long)
+
+    private suspend fun saveTracks(engineRef: Long, projectTitle: String) {
+        val cursorData = getLoopCursors(engineRef)
+        val projectDir = File(loopsDir(), "/$projectTitle")
+        if (projectDir.exists()) {
+            projectDir.listFiles()?.forEach { it.deleteRecursively() }
+        } else {
+            projectDir.mkdirs()
+        }
+        cursorData.asIterable().chunked(2)
+            .dropLast(1) // drop tape
+            .forEachIndexed { i, track ->
+                Log.d("Lupe", "save track $projectTitle$i")
+                saveTrack(engineRef, i, track[0], projectDir, projectTitle)
+            }
+    }
+
+    private suspend fun saveTrack(
+        engineRef: Long,
+        trackId: Int,
+        trackSize: Int,
+        projectDir: File,
+        projectTitle: String
+    ) {
+        val data: FloatArray = sampleTrack(engineRef, trackId, 0, trackSize)
+        val fileName = "/$projectTitle$trackId.lp"
+        val file = File(projectDir, fileName)
+        if (file.exists()) {
+            file.delete()
+        }
+        saveToFile(data, file)
+    }
+
+    private suspend fun loadTracks(engineRef: Long, projectTitle: String) {
+        val loopDir = loopsDir()
+        val projectDir = File(loopDir, "/$projectTitle")
+        if (projectDir.exists()) {
+            projectDir.listFiles()?.forEachIndexed { i, file ->
+                val data = loadFromFile(file)
+                loadTrack(engineRef = engineRef, trackId = i, start = 0, data = data)
+            }
+        }
+    }
 
     private fun adjustDefaultStreamValue() {
         val myAudioMgr = getSystemService(Context.AUDIO_SERVICE) as AudioManager
