@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,14 @@ class MainActivity : AppCompatActivity() {
         adjustDefaultStreamValue()
 
         val engineRef = createEngine()
+
+        loops.getChildAt(0).apply {
+            translationY = -TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                8f,
+                resources.displayMetrics
+            )
+        }
 
         synth_pad.setOnTouchListener { view, event ->
 
@@ -122,25 +131,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         b_load.setOnClickListener {
-            lifecycleScope.launch {
-                tv_loading.text = "loading..."
-                stopPlayback(engineRef)
-                clear(engineRef)
-                withContext(Dispatchers.IO) {
-                    loadTracks(engineRef, getProjectTitle())
+            dialogStringInput("Load", "project dir name", synth_pad.text.toString()) {
+                synth_pad.text = it
+                lifecycleScope.launch {
+                    tv_loading.text = "loading..."
+                    stopPlayback(engineRef)
+                    clear(engineRef)
+                    withContext(Dispatchers.IO) {
+                        loadTracks(engineRef, it)
+                    }
+                    refreshTrackDetails(engineRef)
+                    tv_loading.text = null
                 }
-                refreshTrackDetails(engineRef)
-                tv_loading.text = null
+                true
             }
         }
+
         b_save.setOnClickListener {
-            lifecycleScope.launch {
-                tv_loading.text = "saving..."
-                stopPlayback(engineRef)
-                withContext(Dispatchers.IO) {
-                    saveTracks(engineRef, getProjectTitle())
+            dialogStringInput("Save", "project dir name", synth_pad.text.toString()) {
+                synth_pad.text = it
+                lifecycleScope.launch {
+                    tv_loading.text = "saving..."
+                    stopPlayback(engineRef)
+                    withContext(Dispatchers.IO) {
+                        saveTracks(engineRef, it)
+                    }
+                    tv_loading.text = null
                 }
-                tv_loading.text = null
+                true
             }
         }
     }
@@ -175,14 +193,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun getTrackCursorView(index: Int): View = (loops[index] as ViewGroup)[1]
     private fun getTrackTitleView(index: Int): TextView = (loops[index] as ViewGroup)[0] as TextView
-    private fun getProjectTitle(): String {
-        val input = et_title_input.text.toString()
-        return if (input.isNullOrBlank()) {
-            "no_title"
-        } else {
-            input
-        }
-    }
 
     external fun setDefaultStreamValues(defaultSampleRate: Int, defaultFramesPerBurst: Int)
     external fun createEngine(): Long
