@@ -8,23 +8,24 @@ import java.io.FileOutputStream
 import java.nio.ByteBuffer
 
 suspend fun saveToFile(data: FloatArray, file: File) {
+    log("File save: $file")
     try {
         val out = FileOutputStream(file)
         data.forEachIndexed { index, sample ->
-            Log.d("LUPE", "File saving: ${index.toFloat() / data.size}%")
             val bytes = ByteBuffer.allocate(4).putFloat(sample).array()
             out.write(bytes)
         }
         out.flush()
         out.close()
-        Log.d("LUPE", "File saved: $file")
+        log("File saved: $file")
     } catch (e: Exception) {
         e.printStackTrace()
-        Log.d("LUPE", "File save failed: $file")
+        log("File save failed: $file $e")
     }
 }
 
 suspend fun loadFromFile(file: File): FloatArray {
+    log("File load start: $file")
     val data = mutableListOf<Float>()
     try {
         val ins = FileInputStream(file)
@@ -32,15 +33,14 @@ suspend fun loadFromFile(file: File): FloatArray {
 
         var byte = ins.read(buffer)
         while (byte != -1) {
-            Log.d("LUPE", "Loading loop: ${data.size}")
             data.add(ByteBuffer.wrap(buffer).float)
             byte = ins.read(buffer)
         }
-        Log.d("LUPE", "File loaded: ${data.size}, $file")
+        log("File load success: $file\n float sample count: ${data.size}")
         ins.close()
     } catch (e: Exception) {
         e.printStackTrace()
-        Log.d("LUPE", "File load error: $file")
+        log("File load error: $file $e")
     }
     return data.toFloatArray()
 }
@@ -48,4 +48,8 @@ suspend fun loadFromFile(file: File): FloatArray {
 fun Context.loopsDir(): File {
     val root = getExternalFilesDir(null)
     return File(root, "/LupeLoops")
+}
+
+private fun log(msg: String) {
+    Log.d("LUPE", msg)
 }
