@@ -8,12 +8,18 @@ extern "C" {
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_setDefaultStreamValues(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jint sampleRate,
         jint framesPerBurst) {
 
-    LOGD("Update sample rate: %d -> %d", oboe::DefaultStreamValues::SampleRate, sampleRate);
-    LOGD("Update frames per burst: %d -> %d", oboe::DefaultStreamValues::FramesPerBurst, framesPerBurst);
+    LOGD("Update sample rate: %d -> %d",
+         oboe::DefaultStreamValues::SampleRate,
+         sampleRate
+    );
+    LOGD("Update frames per burst: %d -> %d",
+         oboe::DefaultStreamValues::FramesPerBurst,
+         framesPerBurst
+    );
 
     oboe::DefaultStreamValues::SampleRate = (int32_t) sampleRate;
     oboe::DefaultStreamValues::FramesPerBurst = (int32_t) framesPerBurst;
@@ -27,7 +33,8 @@ Java_com_djonus_lupe_MainActivity_setDefaultStreamValues(
 JNIEXPORT jlong JNICALL
 Java_com_djonus_lupe_MainActivity_createEngine(
         JNIEnv *env,
-        jclass /*unused*/) {
+        jobject obj
+) {
     // We use std::nothrow so `new` returns a nullptr if the engine creation fails
     LupeSoundEngine *engine = new(std::nothrow) LupeSoundEngine();
     return reinterpret_cast<jlong>(engine);
@@ -36,7 +43,7 @@ Java_com_djonus_lupe_MainActivity_createEngine(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_playSynth(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle,
         jdouble x,
         jdouble y) {
@@ -49,7 +56,7 @@ Java_com_djonus_lupe_MainActivity_playSynth(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_stopSynth(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -59,7 +66,7 @@ Java_com_djonus_lupe_MainActivity_stopSynth(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_startPlayback(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -69,7 +76,7 @@ Java_com_djonus_lupe_MainActivity_startPlayback(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_stopPlayback(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -79,7 +86,7 @@ Java_com_djonus_lupe_MainActivity_stopPlayback(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_record(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -89,7 +96,7 @@ Java_com_djonus_lupe_MainActivity_record(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_stopRecord(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -99,7 +106,7 @@ Java_com_djonus_lupe_MainActivity_stopRecord(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_deleteLoop(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle,
         jint loopId) {
 
@@ -110,7 +117,7 @@ Java_com_djonus_lupe_MainActivity_deleteLoop(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_saveCandidate(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
@@ -120,7 +127,7 @@ Java_com_djonus_lupe_MainActivity_saveCandidate(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_setTapeSizeMultiplier(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle,
         jdouble multiplier) {
 
@@ -141,13 +148,13 @@ Java_com_djonus_lupe_MainActivity_clear(
 JNIEXPORT jintArray JNICALL
 Java_com_djonus_lupe_MainActivity_getLoopCursors(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
 
     std::vector<Loop> loops = engine->mLooper.mLoops;
-    std::vector<int32_t > cursorData;
+    std::vector<int32_t> cursorData;
 
     for (int i = 0; i < loops.size(); ++i) {
         cursorData.push_back(loops[i].size());
@@ -157,7 +164,7 @@ Java_com_djonus_lupe_MainActivity_getLoopCursors(
     cursorData.push_back(engine->mLooper.mTapeSize);
     cursorData.push_back(engine->mLooper.mTapeCursor);
 
-    jintArray converted  = env->NewIntArray(cursorData.size());
+    jintArray converted = env->NewIntArray(cursorData.size());
     env->SetIntArrayRegion(converted, 0, cursorData.size(), &cursorData[0]);
 
     return converted;
@@ -166,13 +173,13 @@ Java_com_djonus_lupe_MainActivity_getLoopCursors(
 JNIEXPORT jintArray JNICALL
 Java_com_djonus_lupe_MainActivity_getTrackDetails(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle) {
 
     LupeSoundEngine *engine = reinterpret_cast<LupeSoundEngine *>(engineHandle);
 
     std::vector<Loop> loops = engine->mLooper.mLoops;
-    std::vector<int32_t > trackData;
+    std::vector<int32_t> trackData;
 
     for (int i = 0; i < loops.size(); ++i) {
         int32_t id = loops[i].id();
@@ -182,7 +189,7 @@ Java_com_djonus_lupe_MainActivity_getTrackDetails(
     trackData.push_back(-1); // candidate
     trackData.push_back(-2); // master
 
-    jintArray converted  = env->NewIntArray(trackData.size());
+    jintArray converted = env->NewIntArray(trackData.size());
     env->SetIntArrayRegion(converted, 0, trackData.size(), &trackData[0]);
 
     return converted;
@@ -191,7 +198,7 @@ Java_com_djonus_lupe_MainActivity_getTrackDetails(
 JNIEXPORT jfloatArray JNICALL
 Java_com_djonus_lupe_MainActivity_sampleTrack(
         JNIEnv *env,
-        jclass type,
+        jobject obj,
         jlong engineHandle,
         jint trackId,
         jint start,
@@ -223,7 +230,7 @@ Java_com_djonus_lupe_MainActivity_sampleTrack(
         }
     }
 
-    jfloatArray converted  = env->NewFloatArray(trackData.size());
+    jfloatArray converted = env->NewFloatArray(trackData.size());
     env->SetFloatArrayRegion(converted, 0, trackData.size(), &trackData[0]);
 
     return converted;
@@ -232,7 +239,7 @@ Java_com_djonus_lupe_MainActivity_sampleTrack(
 JNIEXPORT void JNICALL
 Java_com_djonus_lupe_MainActivity_loadTrack(
         JNIEnv *env,
-        jobject thiz,
+        jobject obj,
         jlong engineHandle,
         jint trackId,
         jint start,
@@ -243,7 +250,7 @@ Java_com_djonus_lupe_MainActivity_loadTrack(
     std::vector<Loop> loops = engine->mLooper.mLoops;
     std::vector<float> trackData;
 
-    jfloat* converted = env->GetFloatArrayElements(data, 0);
+    jfloat *converted = env->GetFloatArrayElements(data, 0);
     int inputDataLength = env->GetArrayLength(data);
     LOGD("JNI Input track track length: %d", inputDataLength);
 
