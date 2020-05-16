@@ -12,6 +12,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.djonus.lupe.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -134,14 +135,14 @@ class MainActivity : AppCompatActivity() {
             dialogStringInput("Load", "project dir name", synth_pad.text.toString()) {
                 synth_pad.text = it
                 lifecycleScope.launch {
-                    tv_loading.text = "loading..."
+                    progress_io.isVisible = true
                     stopPlayback(engineRef)
                     clear(engineRef)
                     withContext(Dispatchers.IO) {
                         loadTracks(engineRef, it)
                     }
                     refreshTrackDetails(engineRef)
-                    tv_loading.text = null
+                    progress_io.isVisible = false
                 }
                 true
             }
@@ -151,12 +152,12 @@ class MainActivity : AppCompatActivity() {
             dialogStringInput("Save", "project dir name", synth_pad.text.toString()) {
                 synth_pad.text = it
                 lifecycleScope.launch {
-                    tv_loading.text = "saving..."
+                    progress_io.isVisible = true
                     stopPlayback(engineRef)
                     withContext(Dispatchers.IO) {
                         saveTracks(engineRef, it)
                     }
-                    tv_loading.text = null
+                    progress_io.isVisible = false
                 }
                 true
             }
