@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             while (true) {
-                delay(33)
+                delay(41)
                 val cursorData = getLoopCursors(engineRef)
                 displayCursors(cursorData)
             }
